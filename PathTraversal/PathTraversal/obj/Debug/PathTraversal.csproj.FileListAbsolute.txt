@@ -1,0 +1,6 @@
+C:\Users\Har\source\Workspaces\Path traversal\code\PathTraversal\PathTraversal\bin\Debug\PathTraversal.pdb
+C:\Users\Har\source\Workspaces\Path traversal\code\PathTraversal\PathTraversal\obj\Debug\PathTraversal.csprojResolveAssemblyReference.cache
+C:\Users\Har\source\Workspaces\Path traversal\code\PathTraversal\PathTraversal\obj\Debug\PathTraversal.csproj.CoreCompileInputs.cache
+C:\Users\Har\source\Workspaces\Path traversal\code\PathTraversal\PathTraversal\obj\Debug\PathTraversal.pdb
+C:\Users\Har\source\Workspaces\Path traversal\code\PathTraversal\PathTraversal\bin\Debug\PathTraversal.exe
+C:\Users\Har\source\Workspaces\Path traversal\code\PathTraversal\PathTraversal\obj\Debug\PathTraversal.exe
