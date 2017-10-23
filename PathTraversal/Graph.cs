@@ -1,114 +1,186 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using System.Linq;
 
 namespace PathTraversal
 {
     public class Graph
     {
-        public List<Node> nodeList { set; get; }  // 节点列表
-        public List<Edge> edgeList { set; get; } // 边列表
+        public List<Node> NodeList { set; get; }  // 节点列表
+        public List<Edge> EdgeList { set; get; } // 边列表
 
-        public Graph() 
+        private List<List<Guid>> PathList = new List<List<Guid>>();
+        private List<Guid> OnePath = new List<Guid>();
+        private Stack<Guid> Stack = new Stack<Guid>();
+
+        public Graph()
         {
-            this.nodeList = new List<Node>();
-            this.edgeList = new List<Edge>();
+            this.NodeList = new List<Node>();
+            this.EdgeList = new List<Edge>();
         }
-
-        public string IDToName(Guid ID)
-        {
-            return Node.nodeIdNode[ID].name;
-        }
-
-        /// <summary>
-        /// 将ID列表转化为节点名列表
-        /// </summary>
-        /// <param name="IDList"></param>
-        /// <returns></returns>
-        public List<List<string>> IDToName(List<List<Guid>> IDList)
-        {
-            List<List<string>> ret = new List<List<string>>();
-
-            for (int i = 0; i < IDList.Count; i++)
-            {
-                List<string> tmp = new List<string>();
-                for (int j = 0; j < IDList[i].Count; j++)
-                {
-                    tmp.Add(Node.nodeIdNode[IDList[i][j]].name);
-                }
-                ret.Add(tmp);
-
-            }
-            return ret;
-        }
-
-
 
         /// <summary>
         /// 给图插入新节点
         /// </summary>
         /// <param name="name">节点名</param>
-        public void addNode(string name)
+        public void AddNode(Node node)
         {
-            if (isContain(name))
+            if (IsContainNode(node.ID))
             {
-                throw new ArgumentException("插入了重复节点！");
+                throw new ArgumentException("图中已包含重复ID节点");
             }
-            Node n = new Node(name);
-            this.nodeList.Add(n);
+            else
+            {
+                this.NodeList.Add(node);
+            }
         }
 
-        /// <summary>
-        /// 给图插入新顶点
-        /// </summary>
-        /// <param name="name">顶点名</param>
-        public void addVertex(string name)
-        {
-            if (isContain(name))
-            {
-                throw new ArgumentException("插入了重复顶点！");
-            }
-            Node n = new Node(name, true);
-            this.nodeList.Add(n);
-        }
-
-        /// <summary>
-        /// 根据节点名 插入边
-        /// </summary>
-        /// <param name="nodeSourceName">起点节点名</param>
-        /// <param name="nodeTargetName">终点节点名</param>
-        public void addEdge(string nodeSourceName, string nodeTargetName)
-        {
-            addEdge(Node.nodeNameID[nodeSourceName], Node.nodeNameID[nodeTargetName]);
-        }
 
         /// <summary>
         /// 根据节点ID 插入边
         /// </summary>
         /// <param name="nodeSourceID"></param>
         /// <param name="nodeTargetID"></param>
-        public void addEdge(Guid nodeSourceID, Guid nodeTargetID)
+        public void AddEdge(Guid nodeSourceID, Guid nodeTargetID)
         {
+            if (!IsContainNode(nodeSourceID))
+            {
+                throw new ArgumentException("图中不包含该源点");
+            }
+            if (!IsContainNode(nodeTargetID))
+            {
+                throw new ArgumentException("图中不包含该终点");
+            }
+            if (nodeSourceID == nodeTargetID)
+            {
+                throw new ArgumentException("不能添加源点和终点相同的边");
+            }
             Edge e = new Edge(nodeSourceID, nodeTargetID);
-            this.edgeList.Add(e);
-        }
-      
-        /// <summary>
-        /// 判断插入的节点名是否重复
-        /// </summary>
-        /// <param name="name">节点名</param>
-        /// <returns></returns>
-        public bool isContain(string name)
-        {
-            if (Node.nodeNameID.ContainsKey(name))
+            if (IsContainEdge(e))
             {
-                return true;
+                throw new ArgumentException("不能添加重复的边");
             }
-            else
-            {
-                return false;
-            }
+            this.EdgeList.Add(e);
         }
 
+        /// <summary>
+        /// 判断是否添加重复的边
+        /// </summary>
+        /// <param name="edge"></param>
+        /// <returns></returns>
+        private bool IsContainEdge(Edge edge)
+        {
+            for (int i = 0; i < this.EdgeList.Count; i++)
+            {
+                if (EdgeList[i].Source == edge.Source && EdgeList[i].Target == edge.Target)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 判断是否包含该节点
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
+        private bool IsContainNode(Guid id)
+        {
+            for (int i = 0; i < this.NodeList.Count; i++)
+            {
+                if (id.Equals(this.NodeList[i].ID))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+
+
+
+        /// <summary>
+        /// 返回 所有起始节点到指定节点的所有路径（使用id表示节点）
+        /// </summary>
+        /// <param name="endID">指定节点ID</param>
+        /// <returns></returns>
+        public List<List<Guid>> GetAllPathFromVertex(Guid endNodeID)
+        {
+            List<List<Guid>> ret = new List<List<Guid>>();
+            //List<int> Result = listA.Concat(listB).ToList<int>();
+            for (int i = 0; i < this.NodeList.Count; i++)
+            {
+                if (this.NodeList[i].IsStartNode)
+                {
+                    ret = ret.Concat(GetAllPathFromAToB(this.NodeList[i].ID, endNodeID)).ToList<List<Guid>>();
+                }
+
+            }
+            return ret;
+        }
+
+
+        /// <summary>
+        /// 返回遍历指定两点之间的所有路径 并初始化（试用id表示节点）
+        /// </summary>
+        /// <param name="startID"></param>
+        /// <param name="endID"></param>
+        /// <returns></returns>
+        public List<List<Guid>> GetAllPathFromAToB(Guid startID, Guid endID)
+        {
+            DepthFirstTraversal(ref startID, ref endID);
+            List<List<Guid>> ret = this.PathList.ToList();
+
+            this.PathList.Clear();
+            this.OnePath.Clear();
+            this.Stack.Clear();
+            return ret;
+        }
+
+        /// <summary>
+        /// 使用深度优先遍历算法遍历查找指定两个节点之间的所有路径
+        /// </summary>
+        /// <param name="startID"></param>
+        /// <param name="endID"></param>
+        private void DepthFirstTraversal(ref Guid startID, ref Guid endID)
+        {
+            if (Stack.Count == 0)
+            {
+                Stack.Push(startID);
+                OnePath.Add(startID);
+                DepthFirstTraversal(ref startID, ref endID);
+            }
+            else if (Stack.Peek() == endID)
+            {
+                PathList.Add(OnePath.ToList<Guid>());
+                return;
+            }
+            else if (Stack.Peek() == startID)
+            {
+                return;
+            }
+            Edge e;
+            for (int i = 0; i < this.EdgeList.Count; i++)
+            {
+                e = this.EdgeList[i];
+                if (e.Source == Stack.Peek())
+                {
+                    if (Stack.Contains(e.Target))
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        Stack.Push(e.Target);
+                        OnePath.Add(e.Target);
+                        DepthFirstTraversal(ref startID, ref endID);
+                        Stack.Pop();
+                        OnePath.RemoveAt(OnePath.Count - 1);
+                    }
+                }
+            }
+
+        }
     }
 }
