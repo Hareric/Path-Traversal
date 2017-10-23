@@ -60,7 +60,9 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="EdgeTests.cs" />
     <Compile Include="GraphTests.cs" />
+    <Compile Include="NodeTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

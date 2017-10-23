@@ -105,7 +105,7 @@ namespace PathTraversal
         /// </summary>
         /// <param name="endID">指定节点ID</param>
         /// <returns></returns>
-        public List<List<Guid>> GetAllPathFromVertex(Guid endNodeID)
+        public List<List<Guid>> GetAllPathFromStartNode(Guid endNodeID)
         {
             List<List<Guid>> ret = new List<List<Guid>>();
             //List<int> Result = listA.Concat(listB).ToList<int>();
@@ -113,7 +113,7 @@ namespace PathTraversal
             {
                 if (this.NodeList[i].IsStartNode)
                 {
-                    ret = ret.Concat(GetAllPathFromAToB(this.NodeList[i].ID, endNodeID)).ToList<List<Guid>>();
+                    ret = ret.Concat(GetAllPathFromStartToEnd(this.NodeList[i].ID, endNodeID)).ToList<List<Guid>>();
                 }
 
             }
@@ -127,7 +127,7 @@ namespace PathTraversal
         /// <param name="startID"></param>
         /// <param name="endID"></param>
         /// <returns></returns>
-        public List<List<Guid>> GetAllPathFromAToB(Guid startID, Guid endID)
+        public List<List<Guid>> GetAllPathFromStartToEnd(Guid startID, Guid endID)
         {
             DepthFirstTraversal(ref startID, ref endID);
             List<List<Guid>> ret = this.PathList.ToList();

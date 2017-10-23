@@ -10,7 +10,22 @@ namespace PathTraversal
     {
         public static void Main(string[] args)
         {
-            
+            List<List<string>> lista = new List<List<string>>
+            {
+                new List<string> {"A", "B", "C" },
+                new List<string> {"A", "B" },
+                new List<string> {"A"}
+            };
+
+            List<List<string>> listb = new List<List<string>>
+            {
+                new List<string> {"A", "B", "C" },
+                new List<string> {"A", "B" },
+                new List<string> {"A"}
+            };
+
+            Console.WriteLine(lista.Intersect(listb).Count());
+            Console.ReadLine();
         }
     }
 }
