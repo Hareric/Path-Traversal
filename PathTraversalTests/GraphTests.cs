@@ -1,10 +1,8 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PathTraversal;
+﻿using PathTraversal;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 
 namespace PathTraversal.Tests
@@ -117,17 +115,22 @@ namespace PathTraversal.Tests
             Guid CID = Guid.NewGuid();
             Node CNode = new Node("C", CID);
             testGraph.AddNode(CNode);
+            Guid DID = Guid.NewGuid();
+            Node DNode = new Node("D", DID);
+            testGraph.AddNode(DNode);
             // 添加 A->B B->C A->C 三条边
             testGraph.AddEdge(AID, BID);
             testGraph.AddEdge(BID, CID);
-            testGraph.AddEdge(AID, CID);
-            // 获得 节点A 到 节点C 所有路径
+            testGraph.AddEdge(CID, AID);
+            testGraph.AddEdge(AID, DID);
+            testGraph.AddEdge(CID, DID);
+            // 获得 节点A 到 节点C 所有路径A
             List<List<Guid>> correctResult = new List<List<Guid>>
             {
-                new List<Guid> { AID, BID, CID },
-                new List<Guid> { AID, CID }
+                new List<Guid> { AID, BID, CID , DID},
+                new List<Guid> { AID, DID }
             };
-            List<List<Guid>> testResult = testGraph.GetAllPathFromStartToEnd(AID, CID);
+            List<List<Guid>> testResult = testGraph.GetAllPathFromStartToEnd(AID, DID);
             Assert.AreEqual(testResult.Count, correctResult.Count);
             for (int i = 0; i < testResult.Count; i++)
             {
@@ -142,7 +145,7 @@ namespace PathTraversal.Tests
         }
 
         [TestMethod()]
-        public void GetAllPathFromVertexTest()
+        public void GetAllPathFromStartNodeTest()
         {
             Graph testGraph = new Graph();
 
@@ -180,5 +183,7 @@ namespace PathTraversal.Tests
                 }
             }
         }
+
+       
     }
 }

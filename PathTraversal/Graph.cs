@@ -182,5 +182,9 @@ namespace PathTraversal
             }
 
         }
+
+        public static void Main(string[] args) { }
+
+        
     }
 }
