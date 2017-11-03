@@ -23,7 +23,7 @@ namespace PathTraversal.Tests
         }
 
         [TestMethod()]
-        public void NodeStartNodeTest()
+        public void StartNodeTest()
         {
             Guid testID = Guid.NewGuid();
             string testName = "test";

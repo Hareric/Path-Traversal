@@ -105,7 +105,7 @@ namespace PathTraversal
         /// </summary>
         /// <param name="endID">指定节点ID</param>
         /// <returns></returns>
-        public List<List<Guid>> GetAllPathFromStartNode(Guid endNodeID)
+        public List<List<Guid>> GetAllPathFromStartNode(Guid targetNodeID)
         {
             List<List<Guid>> ret = new List<List<Guid>>();
             //List<int> Result = listA.Concat(listB).ToList<int>();
@@ -113,7 +113,7 @@ namespace PathTraversal
             {
                 if (this.NodeList[i].IsStartNode)
                 {
-                    ret = ret.Concat(GetAllPathFromStartToEnd(this.NodeList[i].ID, endNodeID)).ToList<List<Guid>>();
+                    ret = ret.Concat(GetAllPathBetweenTwoNode(this.NodeList[i].ID, targetNodeID)).ToList<List<Guid>>();
                 }
 
             }
@@ -127,8 +127,12 @@ namespace PathTraversal
         /// <param name="startID"></param>
         /// <param name="endID"></param>
         /// <returns></returns>
-        public List<List<Guid>> GetAllPathFromStartToEnd(Guid startID, Guid endID)
+        public List<List<Guid>> GetAllPathBetweenTwoNode(Guid startID, Guid endID)
         {
+            if (!this.IsContainNode(startID) || !this.IsContainNode(endID))
+            {
+                throw new ArgumentException("无法获取图中不存在的节点之间的路径");
+            }
             DepthFirstTraversal(ref startID, ref endID);
             List<List<Guid>> ret = this.PathList.ToList();
 
@@ -183,7 +187,28 @@ namespace PathTraversal
 
         }
 
-        public static void Main(string[] args) { }
+        public static int fact(int n)
+        {
+            if (n == 1 || n == 0)
+                return 1;
+            else
+                return n * fact(n - 1);
+        }
+
+        public static void Main(string[] args)
+        {
+            int nodeNum = 12;
+            int a = fact(nodeNum-2);
+            Console.WriteLine(a);
+            double b = 0;
+            for (int i=0; i<=nodeNum-2; i++)
+            {
+                b += 1.0 / fact(i);
+                Console.WriteLine(b);
+            }
+            Console.WriteLine((int)(a * b));
+            Console.ReadKey();
+        }
 
         
     }
