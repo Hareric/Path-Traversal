@@ -71,15 +71,15 @@ namespace PathTraversal.Tests
         public void AddNodeHugeTest()
         {
             Graph testGraph = new Graph();
-            
-            for (int i=0; i<10000; i++)
+
+            for (int i = 0; i < 10000; i++)
             {
                 Guid testID = Guid.NewGuid();
                 Node testNode = new Node(i.ToString(), testID);
                 testGraph.AddNode(testNode);
                 Assert.IsTrue(testGraph.NodeList[i].ID.Equals(testNode.ID));
             }
-            
+
         }
 
         [TestMethod()]
@@ -198,10 +198,10 @@ namespace PathTraversal.Tests
         public void AddEdgeHugeTest()
         {
             Graph testGraph = new Graph();
-            for (int i=0; i<4000; i++)
+            for (int i = 0; i < 4000; i++)
             {
                 Guid AID = Guid.NewGuid();
-                Node ANode = new Node("A_"+i.ToString(), AID);
+                Node ANode = new Node("A_" + i.ToString(), AID);
                 testGraph.AddNode(ANode);
                 Guid BID = Guid.NewGuid();
                 Node BNode = new Node("B_" + i.ToString(), BID);
@@ -209,15 +209,15 @@ namespace PathTraversal.Tests
                 testGraph.AddEdge(AID, BID);
                 Assert.AreEqual(testGraph.EdgeList[i].Source, AID);
                 Assert.AreEqual(testGraph.EdgeList[i].Target, BID);
-            }     
+            }
         }
 
         [TestMethod()]
         public void GraphTest()
         {
             Graph testGraph = new Graph();
-            Assert.IsTrue(testGraph.EdgeList.Count == 0);
-            Assert.IsTrue(testGraph.NodeList.Count == 0);
+            Assert.AreEqual(testGraph.EdgeList.Count, 0);
+            Assert.AreEqual(testGraph.NodeList.Count, 0);
         }
         [TestMethod()]
         [ExpectedException(typeof(ArgumentException),
@@ -257,7 +257,7 @@ namespace PathTraversal.Tests
         /// 在一个包含环的图中进行测试
         /// </summary>
         [TestMethod()]
-        public void GetAllPathBetweenTwoNodeCycleGraphTest()
+        public void GetAllPathBetweenTwoNodeStartInCycleGraphTest()
         {
             Graph testGraph = new Graph();
 
@@ -274,23 +274,50 @@ namespace PathTraversal.Tests
             Guid DID = Guid.NewGuid();
             Node DNode = new Node("D", DID);
             testGraph.AddNode(DNode);
-            // 添加 A->B B->C C->A A->D C->D 5条边 其中节点ABC之间存在环状结构
+            // 添加 A->B B->C C->A A->D 4条边 其中节点ABC之间存在环状结构
             testGraph.AddEdge(AID, BID);
             testGraph.AddEdge(BID, CID);
             testGraph.AddEdge(CID, AID);
             testGraph.AddEdge(AID, DID);
-            testGraph.AddEdge(CID, DID);
             // 获得 节点A 到 节点C 所有路径A
             List<List<Guid>> correctResult = new List<List<Guid>>
             {
-                new List<Guid> { AID, BID, CID , DID},
                 new List<Guid> { AID, DID }
             };
             List<List<Guid>> testResult = testGraph.GetAllPathBetweenTwoNode(AID, DID);
-            if (!IsSameList(testResult, correctResult))
+            Assert.IsTrue(IsSameList(testResult, correctResult));
+        }
+        
+        [TestMethod()]
+        public void GetAllPathBetweenTwoNodeEndInCycleGraphTest()
+        {
+            Graph testGraph = new Graph();
+
+            // 添加A、B、C、D四个节点
+            Guid AID = Guid.NewGuid();
+            Node ANode = new Node("A", AID);
+            testGraph.AddNode(ANode);
+            Guid BID = Guid.NewGuid();
+            Node BNode = new Node("B", BID);
+            testGraph.AddNode(BNode);
+            Guid CID = Guid.NewGuid();
+            Node CNode = new Node("C", CID);
+            testGraph.AddNode(CNode);
+            Guid DID = Guid.NewGuid();
+            Node DNode = new Node("D", DID);
+            testGraph.AddNode(DNode);
+            // 添加 A->B B->D D->C C->B 4条边 其中节点BDC之间存在环状结构
+            testGraph.AddEdge(AID, BID);
+            testGraph.AddEdge(BID, DID);
+            testGraph.AddEdge(DID, CID);
+            testGraph.AddEdge(CID, BID);
+            // 获得 节点A 到 节点D 所有路径
+            List<List<Guid>> correctResult = new List<List<Guid>>
             {
-                Assert.Fail();
-            }
+                new List<Guid> { AID, BID, DID }
+            };
+            List<List<Guid>> testResult = testGraph.GetAllPathBetweenTwoNode(AID, DID);
+            Assert.IsTrue(IsSameList(testResult, correctResult));
         }
 
         [TestMethod()]
@@ -298,7 +325,7 @@ namespace PathTraversal.Tests
         {
             Graph testGraph = new Graph();
 
-            // 添加A、B、C四个节点
+            // 添加A、B、C、D四个节点
             Guid AID = Guid.NewGuid();
             Node ANode = new Node("A", AID);
             testGraph.AddNode(ANode);
@@ -308,14 +335,77 @@ namespace PathTraversal.Tests
             Guid CID = Guid.NewGuid();
             Node CNode = new Node("C", CID);
             testGraph.AddNode(CNode);
+            Guid DID = Guid.NewGuid();
+            Node DNode = new Node("D", DID);
+            testGraph.AddNode(DNode);
 
-            // 添加 A->B B->C A->C 边 
+            // 添加 A->B A->C 边
             testGraph.AddEdge(AID, BID);
-            testGraph.AddEdge(BID, CID);
             testGraph.AddEdge(AID, CID);
-            // 获得 节点C 到 节点A 所有路径
-            List<List<Guid>> testResult = testGraph.GetAllPathBetweenTwoNode(CID, AID);
-            Assert.IsTrue(testResult.Count == 0);
+            // 获得 节点A 到 节点D 所有路径
+            List<List<Guid>> testResult = testGraph.GetAllPathBetweenTwoNode(AID, DID);
+            Assert.AreEqual(testResult.Count, 0);
+        }
+        [TestMethod()]
+        public void GetAllPathBetweenTwoNodeOnePathTest()
+        {
+            Graph testGraph = new Graph();
+
+            // 添加A、B、C、D 四个节点
+            Guid AID = Guid.NewGuid();
+            Node ANode = new Node("A", AID);
+            testGraph.AddNode(ANode);
+            Guid BID = Guid.NewGuid();
+            Node BNode = new Node("B", BID);
+            testGraph.AddNode(BNode);
+            Guid CID = Guid.NewGuid();
+            Node CNode = new Node("C", CID);
+            testGraph.AddNode(CNode);
+            Guid DID = Guid.NewGuid();
+            Node DNode = new Node("D", DID);
+            testGraph.AddNode(DNode);
+
+            // 添加 A->B B->D A->C 边
+            testGraph.AddEdge(AID, BID);
+            testGraph.AddEdge(BID, DID);
+            testGraph.AddEdge(AID, CID);
+            // 获得 节点A 到 节点D 所有路径
+            List<List<Guid>> correctResult = new List<List<Guid>>
+                                                { new List<Guid> { AID, BID, DID } };
+            List<List<Guid>> testResult = testGraph.GetAllPathBetweenTwoNode(AID, DID);
+            Assert.IsTrue(IsSameList(testResult, correctResult));
+        }
+
+        [TestMethod()]
+        public void GetAllPathBetweenTwoNodeManyPathTest()
+        {
+            Graph testGraph = new Graph();
+
+            // 添加A、B、C、D 四个节点
+            Guid AID = Guid.NewGuid();
+            Node ANode = new Node("A", AID);
+            testGraph.AddNode(ANode);
+            Guid BID = Guid.NewGuid();
+            Node BNode = new Node("B", BID);
+            testGraph.AddNode(BNode);
+            Guid CID = Guid.NewGuid();
+            Node CNode = new Node("C", CID);
+            testGraph.AddNode(CNode);
+            Guid DID = Guid.NewGuid();
+            Node DNode = new Node("D", DID);
+            testGraph.AddNode(DNode);
+
+            // 添加 A->B B->D A->C C->D边
+            testGraph.AddEdge(AID, BID);
+            testGraph.AddEdge(BID, DID);
+            testGraph.AddEdge(AID, CID);
+            testGraph.AddEdge(CID, DID);
+            // 获得 节点A 到 节点D 所有路径
+            List<List<Guid>> correctResult = new List<List<Guid>>
+                                                { new List<Guid> { AID, BID, DID },
+                                                    new List<Guid> { AID, CID, DID }};
+            List<List<Guid>> testResult = testGraph.GetAllPathBetweenTwoNode(AID, DID);
+            Assert.IsTrue(IsSameList(testResult, correctResult));
         }
 
         [TestMethod()]
@@ -323,18 +413,26 @@ namespace PathTraversal.Tests
         {
             Graph testGraph = new Graph();
 
-            // 添加A点
+            // 添加A、B、C点
             Guid AID = Guid.NewGuid();
             Node ANode = new Node("A", AID);
             testGraph.AddNode(ANode);
+            Guid BID = Guid.NewGuid();
+            Node BNode = new Node("B", BID);
+            testGraph.AddNode(BNode);
+            Guid CID = Guid.NewGuid();
+            Node CNode = new Node("C", CID);
+            testGraph.AddNode(CNode);
+
+            // 添加 A->B B->C C->A 边 
+            testGraph.AddEdge(AID, BID);
+            testGraph.AddEdge(BID, CID);
+            testGraph.AddEdge(CID, AID);
 
             List<List<Guid>> correctResult = new List<List<Guid>>
                                                 { new List<Guid> { AID } };
             List<List<Guid>> testResult = testGraph.GetAllPathBetweenTwoNode(AID, AID);
-            if (!IsSameList(correctResult, testResult))
-            {
-                Assert.Fail();
-            }
+            Assert.IsTrue(IsSameList(correctResult, testResult));
         }
 
         [TestMethod()]
@@ -342,7 +440,7 @@ namespace PathTraversal.Tests
         {
             Graph testGraph = new Graph();
 
-            // 添加A、B、C四个节点
+            // 添加A、B、C、D点
             Guid AID = Guid.NewGuid();
             Node ANode = new Node("A", AID);
             testGraph.AddNode(ANode);
@@ -352,13 +450,17 @@ namespace PathTraversal.Tests
             Guid CID = Guid.NewGuid();
             Node CNode = new Node("C", CID);
             testGraph.AddNode(CNode);
+            Guid DID = Guid.NewGuid();
+            Node DNode = new Node("D", DID);
+            testGraph.AddNode(DNode);
 
-            // 添加 B->C C->B 边 
+            // 添加 A->B B->C C->A 边 
+            testGraph.AddEdge(AID, BID);
             testGraph.AddEdge(BID, CID);
-            testGraph.AddEdge(CID, BID);
-            // 获得 节点C 到 节点A 所有路径
-            List<List<Guid>> testResult = testGraph.GetAllPathBetweenTwoNode(AID, CID);
-            Assert.IsTrue(testResult.Count == 0);
+            testGraph.AddEdge(CID, AID);
+            // 获得 节点D 到 节点A 所有路径
+            List<List<Guid>> testResult = testGraph.GetAllPathBetweenTwoNode(DID, AID);
+            Assert.AreEqual(testResult.Count, 0);
         }
 
         [TestMethod()]
@@ -366,7 +468,7 @@ namespace PathTraversal.Tests
         {
             Graph testGraph = new Graph();
 
-            // 添加A、B、C四个节点
+            // 添加A、B、C、D点
             Guid AID = Guid.NewGuid();
             Node ANode = new Node("A", AID);
             testGraph.AddNode(ANode);
@@ -376,13 +478,17 @@ namespace PathTraversal.Tests
             Guid CID = Guid.NewGuid();
             Node CNode = new Node("C", CID);
             testGraph.AddNode(CNode);
+            Guid DID = Guid.NewGuid();
+            Node DNode = new Node("D", DID);
+            testGraph.AddNode(DNode);
 
-            // 添加 A->B B->A  边 
+            // 添加 A->B B->C C->A 边 
             testGraph.AddEdge(AID, BID);
-            testGraph.AddEdge(BID, AID);
-            // 获得 节点A 到 节点C 所有路径
-            List<List<Guid>> testResult = testGraph.GetAllPathBetweenTwoNode(AID, CID);
-            Assert.IsTrue(testResult.Count == 0);
+            testGraph.AddEdge(BID, CID);
+            testGraph.AddEdge(CID, AID);
+            // 获得 节点D 到 节点A 所有路径
+            List<List<Guid>> testResult = testGraph.GetAllPathBetweenTwoNode(AID, DID);
+            Assert.AreEqual(testResult.Count, 0);
         }
 
         [TestMethod()]
@@ -391,15 +497,16 @@ namespace PathTraversal.Tests
             int testNum = 11;  // 完全图节点个数
             Graph testGraph = new Graph();
             int realPathNum = CalPathNumInCompleteGraph(testNum);  // 完全图中任意2点的路径个数相同
-            for (int i=0; i< testNum; i++)
+            for (int i = 0; i < testNum; i++)
             {
                 Guid testNodeID = Guid.NewGuid();
                 Node testNode = new Node(i.ToString(), testNodeID);
                 testGraph.AddNode(testNode);
             }
-            for (int i=0; i< testNum; i++)
+            // 添加边 构建完全图
+            for (int i = 0; i < testNum; i++)
             {
-                for (int j=0; j< testNum; j++)
+                for (int j = 0; j < testNum; j++)
                 {
                     if (i == j)
                     {
@@ -439,10 +546,7 @@ namespace PathTraversal.Tests
                 new List<Guid> { BID, CID }
             };
             List<List<Guid>> testResult = testGraph.GetAllPathFromStartNode(CID);
-            if (!IsSameList(testResult, correctResult))
-            {
-                Assert.Fail();
-            }
+            Assert.IsTrue(IsSameList(testResult, correctResult));
         }
 
         [TestMethod()]
@@ -450,32 +554,32 @@ namespace PathTraversal.Tests
         {
             Graph testGraph = new Graph();
 
-            // 添加A、B、C三个节点 其中A、C为起始节点
+            // 添加A、B、C、D四个节点 其中A、B、D为起始节点
             Guid AID = Guid.NewGuid();
-            Node ANode = new Node("A", AID, true);
-            testGraph.AddNode(ANode);
+            Node AStartNode = new Node("A", AID, true);
+            testGraph.AddNode(AStartNode);
             Guid BID = Guid.NewGuid();
-            Node BNode = new Node("B", BID);
-            testGraph.AddNode(BNode);
+            Node BStartNode = new Node("B", BID, true);
+            testGraph.AddNode(BStartNode);
             Guid CID = Guid.NewGuid();
-            Node CNode = new Node("C", CID, true);
+            Node CNode = new Node("C", CID);
             testGraph.AddNode(CNode);
-            // 添加 A->B B->C A->C 三条边
+            Guid DID = Guid.NewGuid();
+            Node DStartNode = new Node("D", DID, true);
+            testGraph.AddNode(DStartNode);
+            // 添加 A->B B->C C->D 三条边
             testGraph.AddEdge(AID, BID);
             testGraph.AddEdge(BID, CID);
-            testGraph.AddEdge(AID, CID);
+            testGraph.AddEdge(CID, DID);
             // 获得 所有起始节点 到 节点C 所有路径
             List<List<Guid>> correctResult = new List<List<Guid>>
             {
-                new List<Guid> { AID, BID, CID },
-                new List<Guid> { AID, CID },
-                new List<Guid> { CID }
+                new List<Guid> { AID, BID, CID, DID},
+                new List<Guid> { BID, CID, DID },
+                new List<Guid> {DID}
             };
-            List<List<Guid>> testResult = testGraph.GetAllPathFromStartNode(CID);
-            if (!IsSameList(testResult, correctResult))
-            {
-                Assert.Fail();
-            }
+            List<List<Guid>> testResult = testGraph.GetAllPathFromStartNode(DID);
+            Assert.IsTrue(IsSameList(testResult, correctResult));
         }
 
         [TestMethod()]
@@ -485,38 +589,37 @@ namespace PathTraversal.Tests
 
             // 添加A、B、C三个节点 其中A、B为起始节点
             Guid AID = Guid.NewGuid();
-            Node ANode = new Node("A", AID, true);
-            testGraph.AddNode(ANode);
+            Node AStartNode = new Node("A", AID, true);
+            testGraph.AddNode(AStartNode);
             Guid BID = Guid.NewGuid();
-            Node BNode = new Node("B", BID, true);
-            testGraph.AddNode(BNode);
+            Node BStartNode = new Node("B", BID, true);
+            testGraph.AddNode(BStartNode);
             Guid CID = Guid.NewGuid();
             Node CNode = new Node("C", CID);
             testGraph.AddNode(CNode);
-            // 添加 A->B B->C A->C 三条边
+            Guid DID = Guid.NewGuid();
+            Node DNode = new Node("D", DID);
+            testGraph.AddNode(DNode);
+            // 添加 A->B B->C C->D 三条边
             testGraph.AddEdge(AID, BID);
             testGraph.AddEdge(BID, CID);
-            testGraph.AddEdge(AID, CID);
+            testGraph.AddEdge(CID, DID);
             // 获得 所有起始节点 到 节点C 所有路径
             List<List<Guid>> correctResult = new List<List<Guid>>
             {
-                new List<Guid> { AID, BID, CID },
-                new List<Guid> { AID, CID },
-                new List<Guid> { BID, CID }
+                new List<Guid> { AID, BID, CID, DID},
+                new List<Guid> { BID, CID, DID }
             };
-            List<List<Guid>> testResult = testGraph.GetAllPathFromStartNode(CID);
-            if (!IsSameList(testResult, correctResult))
-            {
-                Assert.Fail();
-            }
+            List<List<Guid>> testResult = testGraph.GetAllPathFromStartNode(DID);
+            Assert.IsTrue(IsSameList(testResult, correctResult));
         }
 
         [TestMethod()]
-        public void GetAllPathFromStartNodeWithoutStartNodeTest()
+        public void GetAllPathFromStartNodeNoStartNodeTest()
         {
             Graph testGraph = new Graph();
 
-            // 添加A、B、C三个节点 其中A、B为起始节点
+            // 添加A、B、C三个节点 
             Guid AID = Guid.NewGuid();
             Node ANode = new Node("A", AID);
             testGraph.AddNode(ANode);
@@ -533,6 +636,138 @@ namespace PathTraversal.Tests
             // 获得 所有起始节点 到 节点C 所有路径
             List<List<Guid>> testResult = testGraph.GetAllPathFromStartNode(CID);
             Assert.AreEqual(testResult.Count, 0);
+        }
+
+        [TestMethod()]
+        public void GetAllPathFromStartNodeOneStartNodeNoPathTest()
+        {
+            Graph testGraph = new Graph();
+
+            // 添加A、B、C三个节点 其中A为起始节点
+            Guid AID = Guid.NewGuid();
+            Node AStartNode = new Node("A", AID, true);
+            testGraph.AddNode(AStartNode);
+            Guid BID = Guid.NewGuid();
+            Node BNode = new Node("B", BID);
+            testGraph.AddNode(BNode);
+            Guid CID = Guid.NewGuid();
+            Node CNode = new Node("C", CID);
+            testGraph.AddNode(CNode);
+            // 添加 A->B 边
+            testGraph.AddEdge(AID, BID);
+            // 获得 所有起始节点 到 节点C 所有路径
+            List<List<Guid>> testResult = testGraph.GetAllPathFromStartNode(CID);
+            Assert.AreEqual(testResult.Count, 0);
+        }
+
+        [TestMethod()]
+        public void GetAllPathFromStartNodeOneStartNodeOnePathTest()
+        {
+            Graph testGraph = new Graph();
+
+            // 添加A、B、C三个节点 其中A为起始节点
+            Guid AID = Guid.NewGuid();
+            Node AStartNode = new Node("A", AID, true);
+            testGraph.AddNode(AStartNode);
+            Guid BID = Guid.NewGuid();
+            Node BNode = new Node("B", BID);
+            testGraph.AddNode(BNode);
+            Guid CID = Guid.NewGuid();
+            Node CNode = new Node("C", CID);
+            testGraph.AddNode(CNode);
+            // 添加 A->B B->C 边
+            testGraph.AddEdge(AID, BID);
+            testGraph.AddEdge(BID, CID);
+            // 获得 所有起始节点 到 节点C 所有路径
+            List<List<Guid>> correctResult = new List<List<Guid>> {
+            new List < Guid > { AID, BID, CID} };
+            List <List<Guid>> testResult = testGraph.GetAllPathFromStartNode(CID);
+            Assert.IsTrue(IsSameList(testResult, correctResult));
+        }
+
+        [TestMethod()]
+        public void GetAllPathFromStartNodeOneStartNodeManyPathTest()
+        {
+            Graph testGraph = new Graph();
+
+            // 添加A、B、C、D三个节点 其中A为起始节点
+            Guid AID = Guid.NewGuid();
+            Node AStartNode = new Node("A", AID, true);
+            testGraph.AddNode(AStartNode);
+            Guid BID = Guid.NewGuid();
+            Node BNode = new Node("B", BID);
+            testGraph.AddNode(BNode);
+            Guid CID = Guid.NewGuid();
+            Node CNode = new Node("C", CID);
+            testGraph.AddNode(CNode);
+            Guid DID = Guid.NewGuid();
+            Node DNode = new Node("D", DID);
+            testGraph.AddNode(DNode);
+            // 添加 A->B B->D A->C C->D 边
+            testGraph.AddEdge(AID, BID);
+            testGraph.AddEdge(BID, DID);
+            testGraph.AddEdge(AID, CID);
+            testGraph.AddEdge(CID, DID);
+            // 获得 所有起始节点 到 节点C 所有路径
+            List<List<Guid>> correctResult = new List<List<Guid>> {
+            new List < Guid > { AID, BID, DID},
+            new List < Guid > { AID, CID, DID}};
+            List<List<Guid>> testResult = testGraph.GetAllPathFromStartNode(DID);
+            Assert.IsTrue(IsSameList(testResult, correctResult));
+        }
+
+        [TestMethod()]
+        public void GetAllPathFromStartNodeManyStartNodeOnePathTest()
+        {
+            Graph testGraph = new Graph();
+
+            // 添加A、B、C三个节点 其中A C为起始节点
+            Guid AID = Guid.NewGuid();
+            Node AStartNode = new Node("A", AID, true);
+            testGraph.AddNode(AStartNode);
+            Guid BID = Guid.NewGuid();
+            Node BNode = new Node("B", BID);
+            testGraph.AddNode(BNode);
+            Guid CID = Guid.NewGuid();
+            Node CNode = new Node("C", CID, true);
+            testGraph.AddNode(CNode);
+
+            // 添加 A->B 边
+            testGraph.AddEdge(AID, BID);
+
+            // 获得 所有起始节点 到 节点B 所有路径
+            List<List<Guid>> correctResult = new List<List<Guid>> {
+            new List < Guid > { AID, BID}};
+            List<List<Guid>> testResult = testGraph.GetAllPathFromStartNode(BID);
+            Assert.IsTrue(IsSameList(testResult, correctResult));
+        }
+
+        [TestMethod()]
+        public void GetAllPathFromStartNodeManyStartNodeManyPathTest()
+        {
+            Graph testGraph = new Graph();
+
+            // 添加A、B、C三个节点 其中A C为起始节点
+            Guid AID = Guid.NewGuid();
+            Node AStartNode = new Node("A", AID, true);
+            testGraph.AddNode(AStartNode);
+            Guid BID = Guid.NewGuid();
+            Node BNode = new Node("B", BID);
+            testGraph.AddNode(BNode);
+            Guid CID = Guid.NewGuid();
+            Node CNode = new Node("C", CID, true);
+            testGraph.AddNode(CNode);
+
+            // 添加 A->B C->B边
+            testGraph.AddEdge(AID, BID);
+            testGraph.AddEdge(CID, BID);
+
+            // 获得 所有起始节点 到 节点B 所有路径
+            List<List<Guid>> correctResult = new List<List<Guid>> {
+            new List < Guid > { AID, BID},
+            new List < Guid > { CID, BID}};
+            List<List<Guid>> testResult = testGraph.GetAllPathFromStartNode(BID);
+            Assert.IsTrue(IsSameList(testResult, correctResult));
         }
 
         [TestMethod()]
@@ -553,19 +788,19 @@ namespace PathTraversal.Tests
             testGraph.AddEdge(AID, BID);
             // 获得 所有起始节点 到 节点C 所有路径
             List<List<Guid>> testResult = testGraph.GetAllPathFromStartNode(Guid.NewGuid());
-            
+
         }
 
         [TestMethod()]
         public void GetAllPathFromStartNodeHugeTest()
         {
-            int testNodeNum = 10;  // 完全图节点个数
-            int testStartNodeNum = 5;  // 作为起始节点的个数
+            int testNodeNum = 11;  // 完全图节点个数
+            int testStartNodeNum = 2;  // 作为起始节点的个数
             int realPathNum = testStartNodeNum * CalPathNumInCompleteGraph(testNodeNum);
-            if (testNodeNum==testStartNodeNum)  
+            if (testNodeNum == testStartNodeNum)
             // 若所有节点均为起始节点，测试时将使用起始节点作为目的节点
             {
-                realPathNum -= CalPathNumInCompleteGraph(testNodeNum); 
+                realPathNum -= CalPathNumInCompleteGraph(testNodeNum);
                 realPathNum += 1;
             }
             Graph testGraph = new Graph();
@@ -583,6 +818,7 @@ namespace PathTraversal.Tests
                 }
                 testGraph.AddNode(testNode);
             }
+            // 添加边 构建完全图
             for (int i = 0; i < testNodeNum; i++)
             {
                 for (int j = 0; j < testNodeNum; j++)
@@ -594,7 +830,7 @@ namespace PathTraversal.Tests
                     testGraph.AddEdge(testGraph.NodeList[i].ID, testGraph.NodeList[j].ID);
                 }
             }
-            List<List<Guid>> testResult = testGraph.GetAllPathFromStartNode(testGraph.NodeList[testNodeNum-1].ID);
+            List<List<Guid>> testResult = testGraph.GetAllPathFromStartNode(testGraph.NodeList[testNodeNum - 1].ID);
             Assert.AreEqual(testResult.Count, realPathNum);
         }
 
@@ -616,6 +852,10 @@ namespace PathTraversal.Tests
 
             for (int i = 0; i < AList.Count; i++)
             {
+                if (AList[i].Count != BList[i].Count)
+                {
+                    return false;
+                }
                 for (int j = 0; j < AList[i].Count; j++)
                 {
                     if (AList[i][j] != BList[i][j])
@@ -647,18 +887,18 @@ namespace PathTraversal.Tests
         /// <returns></returns>
         public int CalPathNumInCompleteGraph(int nodeNum)
         {
-        
+
             int a = Fact(nodeNum - 2);
             double b = 0;
             for (int i = 0; i <= nodeNum - 2; i++)
             {
                 b += 1.0 / Fact(i);
             }
-            
+
             return (int)(a * b);
 
         }
- 
-        
+
+
     }
 }

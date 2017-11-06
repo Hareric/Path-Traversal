@@ -197,11 +197,11 @@ namespace PathTraversal
 
         public static void Main(string[] args)
         {
-            int nodeNum = 12;
-            int a = fact(nodeNum-2);
+            int nodeNum = 11;
+            int a = fact(nodeNum - 2);
             Console.WriteLine(a);
             double b = 0;
-            for (int i=0; i<=nodeNum-2; i++)
+            for (int i = 0; i <= nodeNum - 2; i++)
             {
                 b += 1.0 / fact(i);
                 Console.WriteLine(b);
@@ -210,6 +210,6 @@ namespace PathTraversal
             Console.ReadKey();
         }
 
-        
+
     }
 }
