@@ -56,5 +56,5 @@
 单元测试说明文档 [下载][2]
 
 
-  [1]: http://oevwfwaro.bkt.clouddn.com/%E6%B7%B1%E5%BA%A6%E4%BC%98%E5%85%88%E9%81%8D%E5%8E%86.gif
-  [2]: http://oevwfwaro.bkt.clouddn.com/pathTraversal%20%E5%87%BD%E6%95%B0%E5%8F%8A%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95%E8%AF%B4%E6%98%8E%E6%96%87%E6%A1%A3%20.docx
+  [1]: https://raw.githubusercontent.com/Hareric/tuchuang/master/graph/%E6%B7%B1%E5%BA%A6%E4%BC%98%E5%85%88%E9%81%8D%E5%8E%86.gif
+  [2]: https://github.com/Hareric/tuchuang/blob/master/document/pathTraversal%20%E5%87%BD%E6%95%B0%E5%8F%8A%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95%E8%AF%B4%E6%98%8E%E6%96%87%E6%A1%A3%20.docx?raw=true
